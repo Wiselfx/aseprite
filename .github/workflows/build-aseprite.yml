@@ -1,9 +1,13 @@
 name: Build Aseprite
 on: workflow_dispatch
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      SKIA_VERSION: m124-08a5439a6b
     steps:
       - uses: actions/checkout@v4
         with:
@@ -12,13 +16,13 @@ jobs:
 
       - name: Download Skia m124
         run: |
-          curl -L https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Windows-Debug-x64.zip -o skia.zip
+          curl -L https://github.com/aseprite/skia/releases/download/%SKIA_VERSION%/Skia-Windows-Debug-x64.zip -o skia.zip
           7z x skia.zip -oskia
 
       - name: Build
         shell: cmd
         run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat" -arch=x64
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
           cmake -B build -G Ninja ^
             -DCMAKE_BUILD_TYPE=Debug ^
             -DLAF_BACKEND=skia ^
