@@ -1,0 +1,40 @@
+name: Build Aseprite
+on: workflow_dispatch
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      SKIA_VERSION: m124-08a5439a6b
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: aseprite/aseprite
+          submodules: recursive
+
+      - name: Download Skia m124
+        run: |
+          curl -L https://github.com/aseprite/skia/releases/download/$env:SKIA_VERSION/Skia-Windows-Debug-x64.zip -o skia.zip
+          7z x skia.zip -oskia
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build
+        shell: cmd
+        run: |
+          cmake -B build -G Ninja ^
+            -DCMAKE_BUILD_TYPE=Debug ^
+            -DLAF_BACKEND=skia ^
+            -DSKIA_DIR=%CD%\skia ^
+            -DSKIA_LIBRARY_DIR=%CD%\skia\out\Debug-x64 ^
+            -DSKIA_LIBRARY=%CD%\skia\out\Debug-x64\skia.lib
+          cmake --build build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aseprite
+          path: build/bin/aseprite.exe
+          if-no-files-found: error
