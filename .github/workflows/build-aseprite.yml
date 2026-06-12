@@ -15,6 +15,7 @@ jobs:
           submodules: recursive
 
       - name: Download Skia m124
+        shell: cmd
         run: |
           curl -L https://github.com/aseprite/skia/releases/download/%SKIA_VERSION%/Skia-Windows-Debug-x64.zip -o skia.zip
           7z x skia.zip -oskia
@@ -35,3 +36,4 @@ jobs:
         with:
           name: aseprite
           path: build/bin/aseprite.exe
+          if-no-files-found: error
