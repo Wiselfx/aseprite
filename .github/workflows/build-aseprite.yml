@@ -2,6 +2,7 @@ name: Build Aseprite
 on: workflow_dispatch
 permissions:
   contents: read
+  actions: write
 
 jobs:
   build:
