@@ -73,5 +73,5 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: ${{ runner.os == 'Windows' && 'aseprite-windows' || 'aseprite-macos-arm64' }}
-        path: ${{ runner.os == 'Windows' && 'build/bin/aseprite.exe' || 'build/bin/aseprite' }}
+        path: build
         if-no-files-found: error
