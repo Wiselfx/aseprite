@@ -4,8 +4,12 @@ permissions:
   contents: read
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-15]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -13,20 +17,29 @@ jobs:
     - name: Install Skia
       shell: bash
       run: |
-        this_dir=$(cygpath "${{ github.workspace }}")
+        if [[ "${{ runner.os }}" == "Windows" ]] ; then
+          this_dir=$(cygpath "${{ github.workspace }}")
+        else
+          this_dir="${{ github.workspace }}"
+        fi
         skia_url=$(source $this_dir/laf/misc/skia-url.sh | xargs)
         skia_file=$(basename $skia_url)
         curl --ssl-revoke-best-effort -L -o "$skia_file" "$skia_url"
         unzip "$skia_file" -d skia
     - uses: aseprite/get-ninja@main
     - uses: ilammy/msvc-dev-cmd@v1
+      if: runner.os == 'Windows'
     - name: Generating Makefiles
       shell: bash
       run: |
         export enable_ccache=off
         export laf_backend=skia
         export enable_scripting=on
-        export skia_arch=x64
+        if [[ "${{ runner.os }}" == "macOS" ]] ; then
+          export skia_arch=arm64
+        else
+          export skia_arch=x64
+        fi
         cmake -S . -B build -G Ninja \
           -DCMAKE_BUILD_TYPE=RelWithDebInfo \
           -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
@@ -52,6 +65,6 @@ jobs:
         bash run-tests.sh
     - uses: actions/upload-artifact@v4
       with:
-        name: aseprite-windows
-        path: build/bin/aseprite.exe
+        name: ${{ runner.os == 'Windows' && 'aseprite-windows' || 'aseprite-macos-arm64' }}
+        path: ${{ runner.os == 'Windows' && 'build/bin/aseprite.exe' || 'build/bin/aseprite' }}
         if-no-files-found: error
