@@ -7,6 +7,11 @@
 
 ## Introduction
 
+keep your machine clean and build Aseprite
+quick and dirty workaround
+
+
+
 **Aseprite** is a program to create animated sprites. Its main features are:
 
 * Sprites are composed of [layers &amp; frames](https://www.aseprite.org/docs/timeline/) as separated concepts.
